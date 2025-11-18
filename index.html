@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Joulukalenteri</title>
+</head>
+<body>
+  <header>
+    <h1>Joulukalenteri – 24 luukkua</h1>
+    <p>JavaScript · HTML · CSS – Handmade by Team</p>
+    <div class="toolbar" aria-label="Kalenterin lisätiedot">
+      <div class="badge" id="todayBadge">Päivä: —</div>
+      <div class="badge">Teema: Perinteinen + opiskelijatehtävät</div>
+      <div class="badge">Korostus: Tämän päivän luukku</div>
+    </div>
+  </header>
+
+  <main class="grid" id="grid" aria-label="Joulukalenterin luukut"></main>
+
+  <footer>
+    <p>Joulukalenteri: 24 luukkua · Lyhyet tarinat ja tehtävät · Sopii koululuokalle</p>
+  </footer>
+
+  <!-- Modal -->
+  <div class="modal-backdrop" id="modalBackdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal">
+      <header>
+        <h2 id="modalTitle">Luukku</h2>
+        <button id="closeModal" aria-label="Sulje">Sulje</button>
+      </header>
+      <div class="content" id="modalContent"></div>
+    </div>
+  </div>
+
+  <script>
+    // Sisällöt: lyhyt tarina + helppo tehtävä (nuorille oppijoille)
+    const stories = [
+      {title: "1. Tähtitaivas", text: "Talviyönä taivas on täynnä kirkkaita tähtiä. Jää hetkeksi katsomaan ja hengitä rauhassa.", task: "Laske kotimatkalla 5 tähteä tai jouluvaloa."},
+      {title: "2. Piparintuoksu", text: "Keittiössä tuoksuu piparit. Yksi sydän, yksi tähti, yksi kuusi.", task: "Piirrä paperille oma piparimuotti ja nimeä se."},
+      {title: "3. Lumihiutaleet", text: "Ensimmäiset hiutaleet leijailevat hiljaa alas.", task: "Katso hiutaletta läheltä ja kuvaile kolmella sanalla."},
+      {title: "4. Joulukortti", text: "Käsintehty kortti on aina lämmin ele.", task: "Kirjoita korttiin yksi kiitoslause."},
+      {title: "5. Kuuman kaakaon hetki", text: "Kupillinen kaakaota lämmittää poskia.", task: "Suunnittele oma kaakao: 3 ainesosaa."},
+      {title: "6. Talvinen metsä", text: "Metsän polku narisee kengän alla.", task: "Etsi 3 asiaa, jotka ovat vihreitä talvella."},
+      {title: "7. Lahjasala", text: "Pieni lahja voi olla suuri ajatus.", task: "Keksi lahja, jossa ei ole tavaraa vaan aikaa."},
+      {title: "8. Tontun jäljet", text: "Pihalla näkyy pieniä jalanjälkiä… tonttu vai orava?", task: "Kirjoita 2 lauseen minitarina jäljistä."},
+      {title: "9. Jäälyhty", text: "Pakkasyö tekee vedestä kirkkaita jäälyhtyjä.", task: "Mieti, miten tekisit turvallisesti jäälyhdyn."},
+      {title: "10. Joululaulu", text: "Hiljaa kuiskaten: ‘Tip, tap’…", task: "Listaa 3 lempijoululaulua."},
+      {title: "11. Kuusen koristeet", text: "Säihkyvät pallot ja nauhat.", task: "Suunnittele 1 uusi koriste ja anna sille nimi."},
+      {title: "12. Talvipiirros", text: "Paperi, kynä ja hetki rauhaa.", task: "Piirrä talvinen maisema 5 elementillä."},
+      {title: "13. Kanelin tuoksu", text: "Kaneli, kardemumma, vanilja.", task: "Kirjoita reseptin alku yhdestä mausteesta."},
+      {title: "14. Valon polku", text: "Lyhdyt johdattavat pimeässä.", task: "Suunnittele lyhyt iltareitti, jossa on 3 valopistettä."},
+      {title: "15. Kiitollisuuslista", text: "Pieni hetki kiitollisuudelle.", task: "Kirjoita 3 asiaa, joista olet kiitollinen."},
+      {title: "16. Ystävän viesti", text: "Ystävän ‘hei’ lämmittää.", task: "Lähetä ystävälle tervehdys tai piirros."},
+      {title: "17. Neuleen silmukat", text: "Lanka kiertyy pehmeästi.", task: "Mieti, mikä väri tekisi sinulle hyvää tänään."},
+      {title: "18. Kirjan sivu", text: "Yksi sivu päivässä vie pitkälle.", task: "Lue 1 sivu ja kerro 1 oivallus."},
+      {title: "19. Talvipeli", text: "Lumi tekee pihasta leikkikentän.", task: "Keksi ulkopeli, joka kestää 10 minuuttia."},
+      {title: "20. Kynttilän liekki", text: "Turvallisesti, rauhallisesti, valossa.", task: "Kirjoita 3 sanaa, jotka kuvaavat rauhaa."},
+      {title: "21. Joulun tuoksut", text: "Appelsiini ja neilikka pirskahtelevat.", task: "Tee tuoksukartta: 4 tuoksua ja 1 muisto."},
+      {title: "22. Pieni hyvä teko", text: "Hymy voi olla lahja.", task: "Tee 1 pieni hyvä teko tänään."},
+      {title: "23. Aattoaamu", text: "Odotus on melkein ohi.", task: "Kirjoita ‘toivelista’ kolmella rivillä."},
+      {title: "24. Joulun rauha", text: "Hiljaisuus, valo, kiitollisuus.", task: "Kerro yhdellä lauseella, mitä joulu sinulle merkitsee."}
+    ];
+
+    const grid = document.getElementById('grid');
+    const todayBadge = document.getElementById('todayBadge');
+    const modalBackdrop = document.getElementById('modalBackdrop');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalContent = document.getElementById('modalContent');
+    const closeModalBtn = document.getElementById('closeModal');
+
+    const now = new Date();
+    const isDecember = now.getMonth() === 11; // 0=Jan
+    const today = now.getDate();
+    todayBadge.textContent = isDecember ? `Päivä: ${today}` : `Päivä: ${today} (ei joulukuu)`;
+
+    // Luo 24 luukkua
+    for (let i = 1; i <= 24; i++) {
+      const door = document.createElement('button');
+      door.className = 'door';
+      door.setAttribute('aria-label', `Luukku ${i}`);
+      door.innerHTML = `<span class="num">${i}</span><div class="label">Avaa luukku</div>`;
+
+      // Korosta tämän päivän luukku joulukuussa
+      if (isDecember && i === today) {
+        door.classList.add('today');
+      }
+
+      // Halutessasi voit lukita tulevat luukut:
+      // const locked = isDecember ? i > today : false;
+      // if (locked) { door.classList.add('locked'); door.disabled = true; }
+
+      door.addEventListener('click', () => openDoor(i));
+      grid.appendChild(door);
+    }
+
+    function openDoor(day) {
+      const idx = day - 1;
+      const item = stories[idx];
+      modalTitle.textContent = item?.title ?? `Luukku ${day}`;
+      modalContent.innerHTML = `
+        <p>${item?.text ?? "Luukun tarina puuttuu."}</p>
+        <div class="task">
+          <strong>Tehtävä:</strong>
+          <p>${item?.task ?? "Keksi oma pieni tehtävä tälle päivälle."}</p>
+        </div>
+      `;
+      modalBackdrop.classList.add('show');
+    }
+
+    closeModalBtn.addEventListener('click', () => modalBackdrop.classList.remove('show'));
+    modalBackdrop.addEventListener('click', (e) => {
+      if (e.target === modalBackdrop) modalBackdrop.classList.remove('show');
+    });
+
+    // Näppäimistötuki
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') modalBackdrop.classList.remove('show');
+    });
+  </script>
+</body>
+</html>
