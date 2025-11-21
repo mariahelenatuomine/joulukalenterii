@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+  <meta charset="UTF-8">
+  <title>Joulukalenteri</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <h1>Meemikalenteri</h1>
+  <div class="grid" id="grid"></div>
+
+  <script>
+    const grid = document.getElementById('grid');
+    const now = new Date();
+    const isDecember = true;
+    const today = now.getDate();
+
+    const days = Array.from({ length: 24 }, (_, i) => i + 1);
+    for (let i = days.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [days[i], days[j]] = [days[j], days[i]];
+    }
+
+    const STORAGE_KEY = 'open_doors';
+    const openDoors = new Set(JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'));
+    function save() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify([...openDoors]));
+    }
+
+    days.forEach(day => {
+      const door = document.createElement('div');
+      door.className = 'door';
+      door.textContent = day;
+
+      if (openDoors.has(day)) {
+        door.classList.add('open');
+        door.innerHTML = `<img src="images/${day}.jpg" alt="Luukku ${day}">`;
+      }
+
+      door.onclick = () => {
+      if (day <= today) {
+          door.classList.add('open');
+          door.innerHTML = `<img src="images/${day}.jpg" alt="Luukku ${day}">`;
+          openDoors.add(day);
+          save();
+        }
+      };
+
+      grid.appendChild(door);
+    });
+  </script>
+</body>
+</html>
